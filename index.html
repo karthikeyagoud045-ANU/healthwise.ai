@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthWise AI Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    :root {
+      --blue: #3B82F6;
+      --purple: #8B5CF6;
+      --green: #10B981;
+      --bg: #F8FBFF;
+      --text: #0F172A;
+      --muted: #475569;
+      --border: #E2E8F0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+    a { color: inherit; text-decoration: none; }
+    .container {
+      width: min(1200px, 92%);
+      margin: 0 auto;
+    }
+    header {
+      padding: 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      font-weight: 700;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--blue);
+    }
+    .pill {
+      background: linear-gradient(120deg, rgba(59,130,246,0.12), rgba(139,92,246,0.12));
+      color: var(--blue);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 600;
+      border: 1px solid rgba(59,130,246,0.18);
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0ea5e9, #06b6d4, #8b5cf6);
+      background-size: 200% 200%;
+      animation: gradientShift 12s ease infinite;
+      border-radius: 32px;
+      padding: clamp(28px, 4vw, 48px);
+      margin-bottom: 48px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+      box-shadow: 0 20px 60px rgba(59, 130, 246, 0.12);
+    }
+    .hero::after, .hero::before {
+      content: '';
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(59,130,246,0.18), transparent 60%);
+      filter: blur(40px);
+      z-index: 0;
+    }
+    .hero::after { top: -60px; right: -80px; }
+    .hero::before { bottom: -80px; left: -120px; background: radial-gradient(circle at center, rgba(139,92,246,0.18), transparent 60%); }
+    .hero-content { position: relative; z-index: 1; }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 46px);
+      margin: 0 0 16px;
+      line-height: 1.1;
+    }
+    .hero p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      font-size: 15px;
+    }
+    .btn:hover { transform: translateY(-1px) scale(1.01); box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    .btn:active { transform: translateY(1px); box-shadow: none; }
+    .btn-primary {
+      background: linear-gradient(120deg, var(--blue), var(--purple));
+      color: #fff;
+      box-shadow: 0 12px 32px rgba(59, 130, 246, 0.25);
+      border: 1px solid rgba(255,255,255,0.18);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--blue);
+      border: 1px solid rgba(59,130,246,0.3);
+      backdrop-filter: blur(4px);
+    }
+    .hero-visual {
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 18px;
+      padding: 20px;
+      min-height: 280px;
+      box-shadow: 0 24px 60px rgba(15,23,42,0.15);
+      overflow: hidden;
+    }
+    .hero-visual::after {
+      content: 'AI Dashboard Preview';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      color: var(--muted);
+      font-size: 12px;
+      background: rgba(59,130,246,0.08);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(59,130,246,0.18);
+    }
+    .card-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      margin-top: 12px;
+    }
+    .mini-card {
+      background: linear-gradient(180deg, #F8FAFF 0%, #EFF4FF 100%);
+      border: 1px solid #E4ECFF;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .mini-card strong { color: var(--text); }
+    section { margin: 64px 0; }
+    .section-title {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .section-title h2 {
+      margin: 0;
+      font-size: 28px;
+    }
+    .section-title p {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+    .features, .grid-2, .grid-3 {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+    .panel {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 16px 36px rgba(15,23,42,0.06);
+    }
+    .feature-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 16px 36px rgba(15,23,42,0.06);
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(140deg, rgba(59,130,246,0.18), rgba(139,92,246,0.18));
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      font-weight: 700;
+      flex-shrink: 0;
+      border: 1px solid rgba(59,130,246,0.16);
+    }
+    .feature-card h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+    }
+    .feature-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .steps {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    .step {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 28px rgba(15,23,42,0.04);
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(59,130,246,0.12);
+      color: var(--blue);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .metrics {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin-top: 16px;
+    }
+    .metric {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 10px 26px rgba(15,23,42,0.05);
+    }
+    footer {
+      background: #0F172A;
+      color: #E2E8F0;
+      padding: 32px 0;
+      margin-top: 64px;
+    }
+    .footer-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      align-items: center;
+    }
+    .footer-links {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 14px;
+      color: #CBD5E1;
+    }
+    .social {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .social span {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.08);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    @media (max-width: 768px) {
+      header { flex-direction: column; gap: 10px; align-items: flex-start; }
+      .cta-row { width: 100%; }
+      .footer-grid { grid-template-columns: 1fr; text-align: center; }
+      .social { justify-content: center; }
+    }
+    .pill-muted { background: rgba(15,23,42,0.06); color: var(--muted); border: 1px solid var(--border); }
+    .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+    .tab { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); cursor: pointer; font-weight: 600; color: var(--muted); background: #fff; }
+    .tab.active { color: var(--blue); border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.08); }
+    .list { margin: 0; padding-left: 18px; color: var(--muted); line-height: 1.6; }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+    .chip { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: #fff; font-weight: 600; color: var(--muted); }
+    .chip.active { background: rgba(59,130,246,0.12); color: var(--blue); border-color: rgba(59,130,246,0.4); }
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 12px 28px rgba(15,23,42,0.05);
+    }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: #E2E8F0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(120deg, var(--blue), var(--purple));
+      width: var(--w, 50%);
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 768px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    .pill-muted.green { background: rgba(16,185,129,0.12); color: var(--green); border-color: rgba(16,185,129,0.3); }
+    .pill-muted.yellow { background: rgba(245,158,11,0.12); color: #F59E0B; border-color: rgba(245,158,11,0.3); }
+    .pill-muted.red { background: rgba(239,68,68,0.12); color: #EF4444; border-color: rgba(239,68,68,0.3); }
+    input, select {
+      font-family: inherit;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 9v3l2 2"></path>
+          <circle cx="12" cy="12" r="10"></circle>
+        </svg>
+        HealthWise AI
+      </div>
+      <span class="pill">AI-Powered Care</span>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Your Medical Reports, Simplified by AI</h1>
+        <p>Upload your medical reports and get personalized health recommendations, dietary guidance, and condition-specific exercises—all powered by AI.</p>
+        <div class="cta-row">
+          <button id="hero-upload-btn" class="btn btn-primary">Upload Report</button>
+          <button id="hero-demo-btn" class="btn btn-secondary">See Demo</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="card-grid">
+          <div class="mini-card">
+            <strong>Key Finding</strong>
+            Blood sugar: 145 mg/dL (Moderate)
+          </div>
+          <div class="mini-card">
+            <strong>DO</strong>
+            Walk 30 min daily • Hydrate 8-10 glasses
+          </div>
+          <div class="mini-card">
+            <strong>Exercise Preview</strong>
+            Prenatal squats • Cat-Cow • Side leg raises
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>Upload & Analyze</h2>
+        <p>Drop a report, pick type, see AI findings and recommendations.</p>
+      </div>
+      <div class="grid-2">
+        <div class="panel">
+          <div id="upload-area" class="card" style="border-style:dashed; text-align:center; padding:32px; cursor:pointer; transition:all 0.2s;">
+            <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;">
+            <p id="upload-text" style="margin:0; color:var(--muted);">Drop your medical report here or click to browse</p>
+            <small style="color:var(--muted);">PDF, JPG, PNG (Max 10MB)</small>
+          </div>
+          <div class="chip-row" id="report-type-chips">
+            <span class="chip active" data-type="Blood Test">Blood Test</span>
+            <span class="chip" data-type="Ultrasound">Ultrasound</span>
+            <span class="chip" data-type="X-Ray">X-Ray</span>
+            <span class="chip" data-type="Prescription">Prescription</span>
+            <span class="chip" data-type="Other">Other</span>
+          </div>
+          <div class="two-col">
+            <div class="card">
+              <strong>Patient Info</strong>
+              <div class="chip-row">
+                <input type="number" id="patient-age" placeholder="Age" style="width:80px; padding:6px; border:1px solid var(--border); border-radius:8px;">
+                <select id="patient-gender" style="padding:6px; border:1px solid var(--border); border-radius:8px;">
+                  <option>Gender</option>
+                  <option>M</option>
+                  <option>F</option>
+                  <option>Other</option>
+                </select>
+                <input type="text" id="patient-conditions" placeholder="Conditions" style="flex:1; padding:6px; border:1px solid var(--border); border-radius:8px;">
+              </div>
+            </div>
+            <div class="card" id="file-info" style="display:none;">
+              <strong>File</strong>
+              <p id="file-name" style="margin:6px 0; color:var(--muted); display:flex; align-items:center; gap:8px;"></p>
+              <div class="progress-bar" id="progress-container" style="display:none;"><div class="progress-fill" id="progress-fill" style="--w: 0%;"></div></div>
+              <small id="file-status" style="color:var(--muted);"></small>
+              <button id="clear-file" class="btn btn-secondary" style="margin-top:10px; width:100%;">Remove file</button>
+            </div>
+          </div>
+          <button id="analyze-btn" class="btn btn-primary" style="width:100%; margin-top:12px;" disabled>Analyze Report with AI</button>
+        </div>
+        <div class="panel" id="analysis-panel" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div class="pill">Analysis</div>
+              <h3 id="analysis-title" style="margin:6px 0;">Loading...</h3>
+              <p id="analysis-meta" style="margin:0; color:var(--muted);">Analyzing...</p>
+            </div>
+            <span class="pill-muted" id="severity-badge">Severity: -</span>
+          </div>
+          <div class="tabs" id="analysis-tabs">
+            <div class="tab active" data-tab="findings">Key Findings</div>
+            <div class="tab" data-tab="recommendations">Recommendations</div>
+            <div class="tab" data-tab="diet">Diet Plan</div>
+            <div class="tab" data-tab="exercise">Exercise Plan</div>
+          </div>
+          <div id="tab-content">
+            <div class="two-col">
+              <div class="card">
+                <strong>Key Findings</strong>
+                <ul class="list" id="findings-list"></ul>
+              </div>
+              <div class="card">
+                <strong>DO / DON'T</strong>
+                <ul class="list" id="recommendations-list"></ul>
+              </div>
+            </div>
+            <div class="grid-3" style="margin-top:12px;">
+              <div class="card">
+                <strong>Foods to Include</strong>
+                <p id="foods-include" style="margin:6px 0; color:var(--muted);"></p>
+              </div>
+              <div class="card">
+                <strong>Foods to Avoid</strong>
+                <p id="foods-avoid" style="margin:6px 0; color:var(--muted);"></p>
+              </div>
+              <div class="card">
+                <strong>Actions</strong>
+                <div class="chip-row">
+                  <span class="chip" style="cursor:pointer;">Download PDF</span>
+                  <span class="chip" style="cursor:pointer;">Share with Doctor</span>
+                  <span class="chip" style="cursor:pointer;">Save</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>Exercise Player</h2>
+        <p>Condition-safe workout with timer, controls, and safety tips.</p>
+      </div>
+      <div style="margin-bottom:16px;">
+        <select id="condition-selector" style="padding:10px 14px; border:1px solid var(--border); border-radius:10px; font-size:15px; background:#fff; cursor:pointer;">
+          <option value="pregnancy">Pregnancy - 2nd Trimester</option>
+          <option value="diabetes">Diabetes</option>
+          <option value="hypertension">Hypertension</option>
+          <option value="cardiac">Cardiac Recovery</option>
+          <option value="arthritis">Arthritis</option>
+          <option value="back-pain">Back Pain</option>
+        </select>
+      </div>
+      <div class="grid-3">
+        <div class="panel">
+          <div class="pill" id="condition-badge">Pregnancy · 2nd Trimester</div>
+          <h3 id="workout-title" style="margin:10px 0 6px;">Prenatal Strength & Flexibility</h3>
+          <p id="workout-meta" style="margin:0; color:var(--muted);">15 minutes • Beginner • Benefits: labor prep, circulation</p>
+          <div class="card" style="margin-top:12px; max-height:300px; overflow:auto;">
+            <strong>Exercises</strong>
+            <ul class="list" id="exercise-list" style="list-style:none; padding:0; margin:8px 0 0;"></ul>
+          </div>
+        </div>
+        <div class="panel" style="text-align:center;">
+          <div class="card" style="padding:26px; min-height:260px; display:grid; place-items:center;">
+            <div id="timer-circle" style="width:160px; height:160px; border-radius:50%; border:10px solid rgba(59,130,246,0.2); display:grid; place-items:center; position:relative;">
+              <div id="timer-progress" style="position:absolute; inset:10px; border-radius:50%; background:conic-gradient(var(--blue) 0%, rgba(59,130,246,0.18) 0%); transition:background 0.3s;"></div>
+              <div style="position:relative; background:#fff; width:100px; height:100px; border-radius:50%; display:grid; place-items:center; box-shadow:0 10px 24px rgba(15,23,42,0.12);">
+                <div id="timer-display" style="font-size:28px; font-weight:700;">0:00</div>
+                <small id="current-exercise-name" style="color:var(--muted);">Ready</small>
+              </div>
+            </div>
+          </div>
+          <div class="cta-row" style="justify-content:center; margin-top:12px;">
+            <button id="play-pause-btn" class="btn btn-primary">Start</button>
+            <button id="next-btn" class="btn btn-secondary" disabled>Next</button>
+          </div>
+          <div class="chip-row" style="justify-content:center; margin-top:10px;">
+            <span id="auto-advance-chip" class="chip" style="cursor:pointer;">Auto-advance</span>
+            <span class="chip">Speed 1x</span>
+            <span id="instructions-chip" class="chip" style="cursor:pointer;">Show instructions</span>
+          </div>
+          <div id="instructions-panel" class="card" style="margin-top:12px; display:none;">
+            <strong>Instructions</strong>
+            <p id="exercise-instructions" style="margin:6px 0; color:var(--muted); font-size:13px;"></p>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="card">
+            <strong>Safety</strong>
+            <ul class="list" id="safety-list"></ul>
+          </div>
+          <div class="card" style="margin-top:12px;">
+            <strong>Modifications</strong>
+            <p id="modifications-text" style="margin:6px 0; color:var(--muted);"></p>
+          </div>
+          <div class="card" style="margin-top:12px;">
+            <strong>Progress</strong>
+            <div class="progress-bar"><div class="progress-fill" id="workout-progress" style="--w: 0%;"></div></div>
+            <p id="workout-stats" style="margin:6px 0 0; color:var(--muted);">0 / 0 exercises · 0:00 / 0:00</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>Nutrition Snapshot</h2>
+        <p>Daily score, warnings, and hydration tracker.</p>
+      </div>
+      <div class="grid-3">
+        <div class="panel">
+          <h3 id="nutrition-score" style="margin:0;">Score 0/100</h3>
+          <p id="nutrition-status" style="margin:6px 0; color:var(--muted);">Start logging meals to see your score</p>
+          <div class="progress-bar"><div class="progress-fill" id="nutrition-progress" style="--w: 0%;"></div></div>
+          <ul class="list" style="margin-top:10px;">
+            <li>Water: <span id="water-count">0</span>/8 glasses</li>
+            <li>Meals logged: <span id="meals-count">0</span>/4</li>
+            <li>Avoided foods: <span id="warnings-count">0</span> warnings</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0;">Warnings</h3>
+          <p id="warnings-text" style="margin:6px 0; color:var(--muted);">No warnings yet</p>
+          <div class="chip-row">
+            <span class="chip">Protein <span id="protein-pct">0</span>%</span>
+            <span class="chip">Fiber <span id="fiber-pct">0</span>%</span>
+            <span class="chip">Iron <span id="iron-pct">0</span>%</span>
+          </div>
+          <button class="btn btn-secondary" style="width:100%; margin-top:10px;" onclick="logMeal()">Log Meal</button>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0;">Hydration</h3>
+          <p style="margin:6px 0; color:var(--muted);"><span id="hydration-count">0</span> / 8 glasses</p>
+          <div class="progress-bar"><div class="progress-fill" id="hydration-progress" style="--w: 0%;"></div></div>
+          <div class="chip-row" style="margin-top:10px;">
+            <span class="chip active" style="cursor:pointer;" onclick="addWater()">Add glass</span>
+            <span class="chip" id="reminder-toggle" style="cursor:pointer;" onclick="toggleReminder()">Remind every 2h</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>Progress & Analytics</h2>
+        <p>24-hour goals (resets at midnight) • Streaks • Recent activity</p>
+      </div>
+      <div class="grid-3">
+        <div class="panel">
+          <h3 style="margin:0;">Today's Goals (24hr)</h3>
+          <p id="time-until-reset" style="margin:6px 0; color:var(--muted); font-size:13px;"></p>
+          <div id="daily-goals-list"></div>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0;">Streak</h3>
+          <p style="margin:6px 0; color:var(--muted);">🔥 <span id="streak-days">7</span>-day workout streak</p>
+          <div class="progress-bar"><div class="progress-fill" id="streak-progress" style="--w: 70%;"></div></div>
+        </div>
+        <div class="panel">
+          <h3 style="margin:0;">This Week</h3>
+          <ul class="list" style="margin-top:6px;">
+            <li>Mon: ✅ Walk 30m; ✅ Prenatal Yoga 15m</li>
+            <li>Tue: ✅ Strength 20m; ⚠️ Missed stretch</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>Trusted By</h2>
+        <p>We focus on clarity, safety, and outcomes.</p>
+      </div>
+      <div class="metrics">
+        <div class="metric">
+          <strong>10,000+</strong>
+          <div>Reports analyzed</div>
+        </div>
+        <div class="metric">
+          <strong>15</strong>
+          <div>Conditions supported</div>
+        </div>
+        <div class="metric">
+          <strong>98%</strong>
+          <div>User satisfaction</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="container footer-grid">
+      <div>© 2024 HealthWise AI</div>
+      <div class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="social">
+        <span>Tw</span>
+        <span>Ig</span>
+        <span>In</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ========== PDF.js Setup ==========
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // ========== File Upload & Analysis ==========
+    const heroUploadBtn = document.getElementById('hero-upload-btn');
+    const heroDemoBtn = document.getElementById('hero-demo-btn');
+    const fileInput = document.getElementById('file-input');
+    const uploadArea = document.getElementById('upload-area');
+    const uploadText = document.getElementById('upload-text');
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileStatus = document.getElementById('file-status');
+    const progressContainer = document.getElementById('progress-container');
+    const progressFill = document.getElementById('progress-fill');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const analysisPanel = document.getElementById('analysis-panel');
+    const clearFileBtn = document.getElementById('clear-file');
+    let selectedFile = null;
+    let reportType = 'Blood Test';
+
+    if (heroUploadBtn) {
+      heroUploadBtn.addEventListener('click', () => fileInput.click());
+    }
+    if (heroDemoBtn) {
+      heroDemoBtn.addEventListener('click', () => {
+        alert('Demo mode: load a sample report from the Upload & Analyze section.');
+      });
+    }
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--blue)';
+      uploadArea.style.background = 'rgba(59,130,246,0.05)';
+    });
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = '';
+      uploadArea.style.background = '';
+    });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '';
+      uploadArea.style.background = '';
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File too large. Max 10MB.');
+        return;
+      }
+      selectedFile = file;
+      fileName.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)}MB ✓`;
+      fileInfo.style.display = 'block';
+      fileStatus.textContent = 'Ready to analyze';
+      analyzeBtn.disabled = false;
+      uploadText.textContent = 'File selected ✓';
+    }
+
+    if (clearFileBtn) {
+      clearFileBtn.addEventListener('click', () => {
+        selectedFile = null;
+        fileInput.value = '';
+        fileInfo.style.display = 'none';
+        analyzeBtn.disabled = true;
+        uploadText.textContent = 'Drop your medical report here or click to browse';
+        fileStatus.textContent = '';
+        progressContainer.style.display = 'none';
+        progressFill.style.setProperty('--w', '0%');
+      });
+    }
+
+    document.querySelectorAll('#report-type-chips .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#report-type-chips .chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        reportType = chip.dataset.type;
+      });
+    });
+
+    async function extractTextFromFile(file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (ext === 'pdf') {
+        try {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let text = '';
+          for (let i = 1; i <= Math.min(pdf.numPages, 5); i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(item => item.str).join(' ') + '\n';
+          }
+          return text || `PDF file: ${file.name}`;
+        } catch (e) {
+          console.error('PDF extraction error:', e);
+          return `PDF file: ${file.name}. Unable to extract text.`;
+        }
+      } else {
+        return `Image file: ${file.name}. For images, OCR would be needed for full text extraction.`;
+      }
+    }
+
+    analyzeBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+      
+      analyzeBtn.disabled = true;
+      analyzeBtn.textContent = 'Analyzing...';
+      fileStatus.textContent = 'Extracting text...';
+      progressContainer.style.display = 'block';
+      analysisPanel.style.display = 'block';
+      
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += 2;
+        progressFill.style.setProperty('--w', `${Math.min(progress, 85)}%`);
+      }, 150);
+
+      try {
+        fileStatus.textContent = 'Extracting text from file...';
+        const reportText = await extractTextFromFile(selectedFile);
+        progressFill.style.setProperty('--w', '90%');
+        fileStatus.textContent = 'Sending to AI...';
+
+        const age = document.getElementById('patient-age').value || null;
+        const gender = document.getElementById('patient-gender').value || null;
+        const conditions = document.getElementById('patient-conditions').value.split(',').map(c => c.trim()).filter(c => c) || [];
+
+        const startTime = Date.now();
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reportText: reportText || 'Sample medical report with glucose levels, hemoglobin, and triglycerides.',
+            age: age ? parseInt(age) : null,
+            gender: gender !== 'Gender' ? gender : null,
+            conditions: conditions.length ? conditions : ['General Health Check']
+          })
+        });
+
+        const result = await response.json();
+        clearInterval(progressInterval);
+        progressFill.style.setProperty('--w', '100%');
+
+        if (result.error) {
+          fileStatus.textContent = 'Error: ' + result.error;
+          analyzeBtn.textContent = 'Try Again';
+          analyzeBtn.disabled = false;
+          return;
+        }
+
+        displayAnalysis(result.data);
+        fileStatus.textContent = `Analysis complete ✓ (${Math.round((Date.now() - startTime)/1000)}s)`;
+        analyzeBtn.textContent = 'Analysis Complete';
+      } catch (error) {
+        clearInterval(progressInterval);
+        fileStatus.textContent = 'Error: ' + error.message;
+        analyzeBtn.textContent = 'Try Again';
+        analyzeBtn.disabled = false;
+        console.error(error);
+      }
+    });
+
+    function displayAnalysis(data) {
+      let analysis = data;
+      if (data.raw) {
+        try {
+          analysis = JSON.parse(data.raw);
+        } catch {
+          analysis = { keyFindings: [{ item: data.raw.substring(0, 100), status: 'normal' }] };
+        }
+      }
+      
+      const firstFinding = analysis.keyFindings?.[0];
+      if (firstFinding) {
+        document.getElementById('analysis-title').textContent = 
+          `${firstFinding.item} (${firstFinding.status === 'high' ? 'High' : firstFinding.status === 'low' ? 'Low' : 'Normal'})`;
+      } else {
+        document.getElementById('analysis-title').textContent = 'Report Analyzed';
+      }
+      
+      document.getElementById('analysis-meta').textContent = 
+        `Report type: ${reportType} • Analyzed ${new Date().toLocaleDateString()}`;
+      
+      const severity = analysis.severity || 'yellow';
+      document.getElementById('severity-badge').textContent = `Severity: ${severity.charAt(0).toUpperCase() + severity.slice(1)}`;
+      document.getElementById('severity-badge').className = `pill-muted ${severity}`;
+
+      const findingsList = document.getElementById('findings-list');
+      findingsList.innerHTML = '';
+      if (analysis.keyFindings && analysis.keyFindings.length) {
+        analysis.keyFindings.forEach(f => {
+          const li = document.createElement('li');
+          li.textContent = `${f.item}${f.normalRange ? ` (Normal: ${f.normalRange})` : ''}`;
+          findingsList.appendChild(li);
+        });
+      } else {
+        findingsList.innerHTML = '<li>No specific findings detected</li>';
+      }
+
+      const recList = document.getElementById('recommendations-list');
+      recList.innerHTML = '';
+      if (analysis.dos && analysis.dos.length) {
+        analysis.dos.forEach(d => {
+          const li = document.createElement('li');
+          li.textContent = `✓ ${d}`;
+          recList.appendChild(li);
+        });
+      }
+      if (analysis.donts && analysis.donts.length) {
+        analysis.donts.forEach(d => {
+          const li = document.createElement('li');
+          li.textContent = `✗ ${d}`;
+          recList.appendChild(li);
+        });
+      }
+
+      if (analysis.diet?.include) {
+        document.getElementById('foods-include').textContent = 
+          analysis.diet.include.map(f => `${f.item || f}`).join(' • ') || 'No specific recommendations';
+      }
+      if (analysis.diet?.avoid) {
+        document.getElementById('foods-avoid').textContent = 
+          analysis.diet.avoid.map(f => `${f.item || f}`).join(' • ') || 'No restrictions';
+      }
+    }
+
+    // ========== Exercise Player ==========
+    const exerciseLibrary = {
+      'pregnancy': {
+        badge: 'Pregnancy · 2nd Trimester',
+        title: 'Prenatal Strength & Flexibility',
+        meta: '15 minutes • Beginner • Benefits: labor prep, circulation',
+        exercises: [
+          { name: 'Pelvic Tilts', duration: 60, instructions: 'Lie on back, knees bent. Tighten abs, press lower back to floor. Hold 5s, release.' },
+          { name: 'Pregnancy Squats', duration: 90, instructions: 'Stand with feet shoulder-width. Lower slowly, keeping back straight. Use chair for support if needed.' },
+          { name: 'Cat-Cow Stretch', duration: 60, instructions: 'On hands and knees. Arch back (cow), then round spine (cat). Repeat slowly.' },
+          { name: 'Side Leg Raises', duration: 120, instructions: 'Lie on side. Lift top leg slowly, lower with control. Repeat both sides.' },
+          { name: 'Rest', duration: 30, instructions: 'Take a moment to breathe and hydrate.' }
+        ],
+        safety: ['Stop if dizzy or in pain', 'Hydrate before/after', 'Avoid lying flat after week 12', 'Consult doctor if unsure'],
+        modifications: 'Use chair for support · Add 2-lb weights to progress'
+      },
+      'diabetes': {
+        badge: 'Diabetes Management',
+        title: 'Blood Sugar Control Routine',
+        meta: '20 minutes • Moderate • Benefits: insulin sensitivity, weight management',
+        exercises: [
+          { name: 'Brisk Walking', duration: 300, instructions: 'Walk at moderate pace. Keep posture upright, swing arms naturally.' },
+          { name: 'Chair Squats', duration: 90, instructions: 'Stand in front of chair. Lower as if sitting, stand back up. 12 reps.' },
+          { name: 'Wall Push-ups', duration: 60, instructions: 'Stand facing wall, arms extended. Lower chest to wall, push back. 12 reps.' },
+          { name: 'Seated Marching', duration: 120, instructions: 'Sit tall, lift knees alternately. Keep core engaged.' },
+          { name: 'Rest', duration: 30, instructions: 'Check blood sugar if needed. Hydrate.' }
+        ],
+        safety: ['Check blood sugar before exercise', 'Stop if below 100 mg/dL or above 250 mg/dL', 'Keep glucose tablets nearby', 'Monitor during exercise'],
+        modifications: 'Reduce intensity if needed · Take breaks as required'
+      },
+      'hypertension': {
+        badge: 'Hypertension Management',
+        title: 'Gentle Cardio & Stress Relief',
+        meta: '25 minutes • Low-Moderate • Benefits: BP control, stress reduction',
+        exercises: [
+          { name: 'Moderate Walking', duration: 600, instructions: 'Walk at comfortable pace. Breathe deeply, relax shoulders.' },
+          { name: 'Breathing Exercise', duration: 120, instructions: 'Inhale 4 counts, hold 7, exhale 8. Repeat 5 times.' },
+          { name: 'Gentle Stretching', duration: 180, instructions: 'Stretch all major muscle groups. Hold each stretch 30 seconds.' },
+          { name: 'Rest', duration: 30, instructions: 'Relax and breathe deeply.' }
+        ],
+        safety: ['Avoid holding breath', 'Stop if chest pain or dizziness', 'Monitor BP before/after', 'Avoid heavy lifting'],
+        modifications: 'Reduce pace if needed · Extend rest periods'
+      },
+      'cardiac': {
+        badge: 'Cardiac Recovery',
+        title: 'Post-Cardiac Rehabilitation',
+        meta: '15 minutes • Beginner • Benefits: gradual strength building',
+        exercises: [
+          { name: 'Light Walking', duration: 300, instructions: 'Walk slowly, monitor heart rate. Stop if chest discomfort.' },
+          { name: 'Arm Raises', duration: 60, instructions: 'Sit or stand. Raise arms slowly to shoulder height, lower. 10 reps.' },
+          { name: 'Ankle Pumps', duration: 60, instructions: 'Point toes up, then down. Repeat 20 times each foot.' },
+          { name: 'Rest', duration: 60, instructions: 'Monitor heart rate. Rest if needed.' }
+        ],
+        safety: ['STOP if chest pain or pressure', 'Monitor heart rate continuously', 'Call 911 if severe symptoms', 'Follow doctor\'s guidelines'],
+        modifications: 'Reduce duration if needed · Always supervised initially'
+      },
+      'arthritis': {
+        badge: 'Arthritis Management',
+        title: 'Joint Mobility & Flexibility',
+        meta: '20 minutes • Low Impact • Benefits: reduce stiffness, improve range',
+        exercises: [
+          { name: 'Range of Motion', duration: 120, instructions: 'Move each joint through full range. Shoulders, wrists, hips, knees, ankles.' },
+          { name: 'Water Walking', duration: 300, instructions: 'Walk in pool or shallow water. Low impact, joint-friendly.' },
+          { name: 'Gentle Stretching', duration: 180, instructions: 'Stretch gently, never force. Hold 20-30 seconds.' },
+          { name: 'Rest', duration: 30, instructions: 'Apply heat if joints are stiff.' }
+        ],
+        safety: ['Avoid exercises during flare-ups', 'Stop if pain increases', 'Use heat before, ice after', 'Move slowly and gently'],
+        modifications: 'Reduce range if painful · Use assistive devices'
+      },
+      'back-pain': {
+        badge: 'Back Pain Relief',
+        title: 'Core Strengthening & Flexibility',
+        meta: '18 minutes • Low-Moderate • Benefits: core strength, pain relief',
+        exercises: [
+          { name: 'Pelvic Tilts', duration: 90, instructions: 'Lie on back, knees bent. Flatten lower back to floor, hold 5s.' },
+          { name: 'Cat-Cow Stretch', duration: 90, instructions: 'On hands and knees. Arch and round spine slowly.' },
+          { name: 'Knee-to-Chest', duration: 120, instructions: 'Lie on back. Bring one knee to chest, hold 30s. Alternate.' },
+          { name: 'Bird Dog', duration: 120, instructions: 'On hands and knees. Extend opposite arm and leg, hold 5s. Alternate.' },
+          { name: 'Rest', duration: 30, instructions: 'Relax and breathe.' }
+        ],
+        safety: ['Stop if pain increases', 'Avoid forward bending', 'Keep movements slow', 'Consult if pain persists'],
+        modifications: 'Reduce range if painful · Use pillow support'
+      }
+    };
+
+    let currentWorkout = null;
+    let currentExerciseIndex = 0;
+    let timerInterval = null;
+    let timeRemaining = 0;
+    let isPlaying = false;
+    let autoAdvance = false;
+
+    function loadWorkout(condition) {
+      currentWorkout = exerciseLibrary[condition];
+      if (!currentWorkout) return;
+      
+      document.getElementById('condition-badge').textContent = currentWorkout.badge;
+      document.getElementById('workout-title').textContent = currentWorkout.title;
+      document.getElementById('workout-meta').textContent = currentWorkout.meta;
+      
+      const list = document.getElementById('exercise-list');
+      list.innerHTML = '';
+      currentWorkout.exercises.forEach((ex, i) => {
+        const li = document.createElement('li');
+        li.style.padding = '6px 0';
+        li.style.cursor = 'pointer';
+        li.id = `ex-${i}`;
+        li.innerHTML = `<span id="ex-status-${i}">○</span> <strong>${ex.name}</strong> — ${formatTime(ex.duration)}`;
+        list.appendChild(li);
+      });
+
+      const safetyList = document.getElementById('safety-list');
+      safetyList.innerHTML = '';
+      currentWorkout.safety.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        safetyList.appendChild(li);
+      });
+
+      document.getElementById('modifications-text').textContent = currentWorkout.modifications;
+      
+      currentExerciseIndex = 0;
+      resetTimer();
+      updateWorkoutStats();
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function resetTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      isPlaying = false;
+      if (currentWorkout && currentWorkout.exercises[currentExerciseIndex]) {
+        timeRemaining = currentWorkout.exercises[currentExerciseIndex].duration;
+        updateTimerDisplay();
+        document.getElementById('play-pause-btn').textContent = 'Start';
+        document.getElementById('next-btn').disabled = false;
+      }
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById('timer-display').textContent = formatTime(timeRemaining);
+      if (currentWorkout && currentWorkout.exercises[currentExerciseIndex]) {
+        document.getElementById('current-exercise-name').textContent = currentWorkout.exercises[currentExerciseIndex].name;
+        const progress = 1 - (timeRemaining / currentWorkout.exercises[currentExerciseIndex].duration);
+        const degrees = progress * 360;
+        document.getElementById('timer-progress').style.background = 
+          `conic-gradient(var(--blue) ${degrees}deg, rgba(59,130,246,0.18) ${degrees}deg)`;
+      }
+      
+      // Update exercise list highlighting
+      currentWorkout.exercises.forEach((ex, i) => {
+        const statusEl = document.getElementById(`ex-status-${i}`);
+        if (i < currentExerciseIndex) {
+          statusEl.textContent = '✓';
+          statusEl.style.color = 'var(--green)';
+        } else if (i === currentExerciseIndex) {
+          statusEl.textContent = '●';
+          statusEl.style.color = 'var(--blue)';
+        } else {
+          statusEl.textContent = '○';
+          statusEl.style.color = 'var(--muted)';
+        }
+      });
+    }
+
+    function startTimer() {
+      if (!currentWorkout || !currentWorkout.exercises[currentExerciseIndex]) return;
+      
+      isPlaying = true;
+      document.getElementById('play-pause-btn').textContent = 'Pause';
+      document.getElementById('next-btn').disabled = true;
+      
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateTimerDisplay();
+        
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          completeExercise();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      isPlaying = false;
+      if (timerInterval) clearInterval(timerInterval);
+      document.getElementById('play-pause-btn').textContent = 'Resume';
+      document.getElementById('next-btn').disabled = false;
+    }
+
+    function completeExercise() {
+      currentExerciseIndex++;
+      if (currentExerciseIndex >= currentWorkout.exercises.length) {
+        // Workout complete
+        alert('🎉 Workout Complete! Great job!');
+        currentExerciseIndex = 0;
+        resetTimer();
+        updateWorkoutStats();
+        return;
+      }
+      
+      if (autoAdvance) {
+        resetTimer();
+        startTimer();
+      } else {
+        resetTimer();
+      }
+      updateWorkoutStats();
+    }
+
+    function updateWorkoutStats() {
+      const completed = currentExerciseIndex;
+      const total = currentWorkout.exercises.length;
+      const totalTime = currentWorkout.exercises.reduce((sum, ex) => sum + ex.duration, 0);
+      const elapsed = currentWorkout.exercises.slice(0, currentExerciseIndex).reduce((sum, ex) => sum + ex.duration, 0);
+      const progress = total > 0 ? (completed / total) * 100 : 0;
+      
+      document.getElementById('workout-progress').style.setProperty('--w', `${progress}%`);
+      document.getElementById('workout-stats').textContent = 
+        `${completed} / ${total} exercises · ${formatTime(elapsed)} / ${formatTime(totalTime)}`;
+    }
+
+    document.getElementById('play-pause-btn').addEventListener('click', () => {
+      if (isPlaying) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    });
+
+    document.getElementById('next-btn').addEventListener('click', () => {
+      completeExercise();
+    });
+
+    document.getElementById('auto-advance-chip').addEventListener('click', function() {
+      autoAdvance = !autoAdvance;
+      this.classList.toggle('active');
+      this.textContent = autoAdvance ? 'Auto-advance ✓' : 'Auto-advance';
+    });
+
+    document.getElementById('instructions-chip').addEventListener('click', function() {
+      const panel = document.getElementById('instructions-panel');
+      const isVisible = panel.style.display !== 'none';
+      panel.style.display = isVisible ? 'none' : 'block';
+      if (!isVisible && currentWorkout && currentWorkout.exercises[currentExerciseIndex]) {
+        document.getElementById('exercise-instructions').textContent = 
+          currentWorkout.exercises[currentExerciseIndex].instructions;
+      }
+    });
+
+    document.getElementById('condition-selector').addEventListener('change', (e) => {
+      loadWorkout(e.target.value);
+    });
+
+    // Initialize with pregnancy workout
+    loadWorkout('pregnancy');
+
+    // ========== Nutrition Snapshot ==========
+    let nutritionData = {
+      water: 0,
+      meals: 0,
+      warnings: 0,
+      protein: 0,
+      fiber: 0,
+      iron: 0,
+      score: 0
+    };
+
+    function loadNutritionData() {
+      const today = new Date().toDateString();
+      const stored = localStorage.getItem('nutrition_' + today);
+      if (stored) {
+        nutritionData = JSON.parse(stored);
+      } else {
+        nutritionData = { water: 0, meals: 0, warnings: 0, protein: 0, fiber: 0, iron: 0, score: 0 };
+      }
+      updateNutritionDisplay();
+    }
+
+    function saveNutritionData() {
+      const today = new Date().toDateString();
+      localStorage.setItem('nutrition_' + today, JSON.stringify(nutritionData));
+      updateNutritionDisplay();
+    }
+
+    function updateNutritionDisplay() {
+      // Calculate score
+      const waterScore = Math.min((nutritionData.water / 8) * 30, 30);
+      const mealsScore = Math.min((nutritionData.meals / 4) * 40, 40);
+      const warningsPenalty = Math.min(nutritionData.warnings * 5, 30);
+      nutritionData.score = Math.max(0, Math.min(100, waterScore + mealsScore - warningsPenalty));
+
+      document.getElementById('nutrition-score').textContent = `Score ${Math.round(nutritionData.score)}/100`;
+      document.getElementById('nutrition-status').textContent = 
+        nutritionData.score >= 80 ? '🎉 Excellent adherence!' :
+        nutritionData.score >= 60 ? '👍 Good progress!' :
+        nutritionData.score >= 40 ? 'Keep going!' : 'Start logging meals to see your score';
+      
+      document.getElementById('nutrition-progress').style.setProperty('--w', `${nutritionData.score}%`);
+      document.getElementById('water-count').textContent = nutritionData.water;
+      document.getElementById('meals-count').textContent = nutritionData.meals;
+      document.getElementById('warnings-count').textContent = nutritionData.warnings;
+      
+      const hydrationPct = (nutritionData.water / 8) * 100;
+      document.getElementById('hydration-progress').style.setProperty('--w', `${hydrationPct}%`);
+      document.getElementById('hydration-count').textContent = nutritionData.water;
+      
+      document.getElementById('protein-pct').textContent = Math.round(nutritionData.protein);
+      document.getElementById('fiber-pct').textContent = Math.round(nutritionData.fiber);
+      document.getElementById('iron-pct').textContent = Math.round(nutritionData.iron);
+      
+      if (nutritionData.warnings > 0) {
+        document.getElementById('warnings-text').textContent = 
+          `⚠️ ${nutritionData.warnings} food warning${nutritionData.warnings > 1 ? 's' : ''} logged today`;
+      } else {
+        document.getElementById('warnings-text').textContent = 'No warnings yet';
+      }
+    }
+
+    window.addWater = function() {
+      if (nutritionData.water < 8) {
+        nutritionData.water++;
+        saveNutritionData();
+        updateDailyGoal('water');
+      }
+    };
+
+    window.logMeal = function() {
+      nutritionData.meals = Math.min(nutritionData.meals + 1, 4);
+      nutritionData.protein = Math.min(nutritionData.protein + 15, 100);
+      nutritionData.fiber = Math.min(nutritionData.fiber + 10, 100);
+      nutritionData.iron = Math.min(nutritionData.iron + 8, 100);
+      saveNutritionData();
+      updateDailyGoal('meals');
+    };
+
+    window.toggleReminder = function() {
+      const chip = document.getElementById('reminder-toggle');
+      const enabled = chip.classList.contains('active');
+      if (enabled) {
+        chip.classList.remove('active');
+        chip.textContent = 'Remind every 2h';
+        if (window.waterReminder) clearInterval(window.waterReminder);
+      } else {
+        chip.classList.add('active');
+        chip.textContent = 'Reminders ON';
+        window.waterReminder = setInterval(() => {
+          if (nutritionData.water < 8) {
+            alert('💧 Time to hydrate! Drink a glass of water.');
+          }
+        }, 2 * 60 * 60 * 1000); // 2 hours
+      }
+    };
+
+    loadNutritionData();
+
+    // ========== 24-hour Goal Tracker ==========
+    const dailyGoals = [
+      { id: 'water', name: 'Drink 8 glasses of water', target: 8, current: 0, unit: 'glasses' },
+      { id: 'exercise', name: 'Complete 30 min exercise', target: 30, current: 0, unit: 'minutes' },
+      { id: 'meals', name: 'Log 3 meals', target: 3, current: 0, unit: 'meals' },
+      { id: 'steps', name: 'Walk 5000 steps', target: 5000, current: 0, unit: 'steps' }
+    ];
+
+    function getMidnightReset() {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      return midnight;
+    }
+
+    function updateTimeUntilReset() {
+      const now = new Date();
+      const midnight = getMidnightReset();
+      const diff = midnight - now;
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const el = document.getElementById('time-until-reset');
+      if (el) el.textContent = `Resets in ${hours}h ${minutes}m`;
+    }
+
+    function loadDailyGoals() {
+      const today = new Date().toDateString();
+      const stored = localStorage.getItem('dailyGoals_' + today);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        dailyGoals.forEach(goal => {
+          const saved = parsed.find(g => g.id === goal.id);
+          if (saved) goal.current = saved.current;
+        });
+      } else {
+        dailyGoals.forEach(g => g.current = 0);
+      }
+      renderDailyGoals();
+    }
+
+    function saveDailyGoals() {
+      const today = new Date().toDateString();
+      localStorage.setItem('dailyGoals_' + today, JSON.stringify(dailyGoals));
+    }
+
+    function updateDailyGoal(goalId) {
+      const goal = dailyGoals.find(g => g.id === goalId);
+      if (goal) {
+        if (goalId === 'water') goal.current = nutritionData.water;
+        if (goalId === 'meals') goal.current = nutritionData.meals;
+        saveDailyGoals();
+        renderDailyGoals();
+      }
+    }
+
+    function renderDailyGoals() {
+      const container = document.getElementById('daily-goals-list');
+      if (!container) return;
+      container.innerHTML = '';
+      dailyGoals.forEach(goal => {
+        const progress = Math.min((goal.current / goal.target) * 100, 100);
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.marginBottom = '8px';
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <strong style="font-size:13px;">${goal.name}</strong>
+            <span style="color:var(--muted); font-size:12px;">${goal.current}/${goal.target} ${goal.unit}</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="--w: ${progress}%;"></div></div>
+          <button onclick="updateGoal('${goal.id}')" style="margin-top:6px; padding:4px 8px; font-size:11px; border:1px solid var(--border); border-radius:6px; background:#fff; cursor:pointer;">+1</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    window.updateGoal = function(goalId) {
+      const goal = dailyGoals.find(g => g.id === goalId);
+      if (goal && goal.current < goal.target) {
+        goal.current++;
+        saveDailyGoals();
+        renderDailyGoals();
+      }
+    };
+
+    // Initialize
+    loadDailyGoals();
+    updateTimeUntilReset();
+    setInterval(updateTimeUntilReset, 60000);
+
+    setInterval(() => {
+      const now = new Date();
+      if (now.getHours() === 0 && now.getMinutes() === 0) {
+        loadDailyGoals();
+        loadNutritionData();
+      }
+    }, 60000);
+  </script>
+</body>
+</html>
+
