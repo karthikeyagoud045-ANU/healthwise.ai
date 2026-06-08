@@ -126,6 +126,3 @@ healthwise.ai/
 
 ---
 
-## 📝 License
-
-MIT License
