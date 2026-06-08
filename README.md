@@ -1,74 +1,131 @@
-# HealthWise AI - Local Development
+# 🏥 HealthWise AI
 
-## Quick Start (Offline Testing)
+<div align="center">
 
-### Option 1: Simple Local Server (No API)
+AI-powered **medical report analysis** tool — upload lab reports and get instant, intelligent health insights powered by Google Gemini.
 
-Just open the HTML file or use a simple server:
+![Gemini](https://img.shields.io/badge/Gemini-AI-blue)
+![Netlify](https://img.shields.io/badge/Netlify-Deployed-brightgreen)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+</div>
+
+---
+
+## ✨ Features
+
+- **Medical Report Analysis** — Paste or upload lab report text
+- **PDF Support** — Extract text from PDF reports using PDF.js
+- **Personalized Insights** — Considers age, gender, and existing conditions
+- **AI-Powered** — Google Gemini API for medical analysis
+- **Clean UI** — Modern, responsive interface with Inter font
+
+---
+
+## 🛠 Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| **HTML/CSS/JS** | Single-page application |
+| **Google Gemini AI** | Medical report analysis |
+| **PDF.js** | PDF text extraction |
+| **Netlify Functions** | Serverless API (`/api/analyze`) |
+| **Netlify** | Hosting + deployment |
+
+---
+
+## 🚀 Quick Start
+
+### Option 1: Simple Static (UI only, no API)
 
 ```bash
-# Using Python (if installed)
+# Using Python
 python3 -m http.server 8000
 
 # Or using Node.js
 npx serve .
-
-# Then open: http://localhost:8000
 ```
 
-**Note**: The API won't work with this method, but you can see the UI.
+Open [http://localhost:8000](http://localhost:8000)
 
 ### Option 2: Full Local Development (With API)
 
-1. **Install dependencies:**
 ```bash
 npm install
 ```
 
-2. **Set up environment variable:**
-Make sure `.env` file exists with:
-```
-GEMINI_API_KEY=AIzaSyAe9ufBh6xamANbME-ieD3OicjJO3BQE2I
+Create a `.env` file:
+
+```env
+GEMINI_API_KEY=your-g...-key
 ```
 
-3. **Run Netlify Dev (runs both frontend + API locally):**
+Run:
+
 ```bash
 npm run dev
 # or
 netlify dev
 ```
 
-4. **Open browser:**
+Open [http://localhost:8888](http://localhost:8888)
+
+### Build & Deploy
+
+Already configured for Netlify. Push to GitHub and connect to Netlify.
+
+---
+
+## 📡 API
+
+### `POST /api/analyze`
+
+Analyzes medical report text with Gemini AI.
+
+**Request:**
+
+```json
+{
+  "reportText": "Fasting glucose: 145 mg/dL, Hemoglobin: 11.2 g/dL",
+  "age": 28,
+  "gender": "F",
+  "conditions": ["Gestational Diabetes"]
+}
 ```
-http://localhost:8888
-```
 
-The API will be available at `http://localhost:8888/api/analyze`
-
-### Option 3: Direct File Open
-
-You can also just double-click `index.html` to open it in your browser, but:
-- API calls won't work (CORS issues)
-- You'll see the UI but can't test the analysis feature
-
-## Testing the API Locally
-
-Once `netlify dev` is running, test with:
+**Test locally:**
 
 ```bash
 curl -X POST http://localhost:8888/api/analyze \
   -H "Content-Type: application/json" \
-  -d '{
-    "reportText": "Fasting glucose: 145 mg/dL, Hemoglobin: 11.2 g/dL",
-    "age": 28,
-    "gender": "F",
-    "conditions": ["Gestational Diabetes"]
-  }'
+  -d '{"reportText": "Fasting glucose: 145 mg/dL", "age": 28, "gender": "M"}'
 ```
 
-## Troubleshooting
+---
 
-- **API key error**: Make sure `.env` file exists with `GEMINI_API_KEY`
-- **Port already in use**: Change port in `netlify.toml` or kill the process using port 8888
-- **Function not found**: Make sure `netlify/functions/analyze.js` exists
+## 📁 Project Structure
 
+```
+healthwise.ai/
+├── index.html              # Main SPA (UI + Gemini client)
+├── netlify.toml            # Netlify config
+├── package.json            # Dependencies
+├── deno.lock               # Deno lock file
+├── SETUP.md                # Detailed setup guide
+├── healthwise-prompts.md   # AI prompt templates
+└── README.md
+```
+
+---
+
+## 🔧 Environment Variables
+
+| Variable | Description | Required |
+|---|---|---|
+| `GEMINI_API_KEY` | Google Gemini API key | Yes (for API) |
+
+---
+
+## 📝 License
+
+MIT License
